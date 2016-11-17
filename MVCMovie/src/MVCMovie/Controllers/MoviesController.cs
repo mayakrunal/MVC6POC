@@ -7,16 +7,20 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MVCMovie.Data;
 using MVCMovie.Models;
+using Microsoft.Extensions.Options;
 
 namespace MVCMovie.Controllers
 {
     public class MoviesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly ConnectionStringsOptions _connectionStringOptions;
 
-        public MoviesController(ApplicationDbContext context)
+        public MoviesController(ApplicationDbContext context,
+                                IOptions<ConnectionStringsOptions> connectionStringOptions)
         {
-            _context = context;    
+            _context = context;
+            _connectionStringOptions = connectionStringOptions.Value;
         }
 
         // GET: Movies
