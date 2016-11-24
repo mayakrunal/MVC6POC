@@ -1,0 +1,36 @@
+﻿@section styles {
+    <environment names="Development">
+        <link href="~/css/todo.css" rel="stylesheet" />
+    </environment>
+    <environment names="Production,Staging">
+        <link href="~/css/todo.min.css" rel="stylesheet" asp-append-version="true" />
+    </environment>
+}
+@section scripts{
+    <environment names="Development">
+        <script src="~/js/todo.js"></script>
+    </environment>
+    <environment names="Production,Staging">
+        <script src="~/js/todo.min.js" asp-append-version="true"></script>
+    </environment>
+}
+
+<div ng-app="todoApp">
+    <h2>To do</h2>
+    <div ng-controller="TodoListController as todoList">
+        <span>{{todoList.remaining()}} of {{todoList.length}} remaining</span>
+        [<a href="" ng-click="todoList.archive()">archive</a>]
+        <ul class="list-unstyled">
+            <li ng-repeat="todo in todoList.todos">
+                <label class="checkbox">
+                    <input type="checkbox" ng-model="todo.done" />
+                    <span class="done-{{todo.done}}">{{todo.text}}</span>
+                </label>
+            </li>
+        </ul>
+        <form ng-submit="todoList.addTodo()">
+            <input type="text" ng-model="todoList.todoText" size="30" placeholder="add new todo here" />
+            <input class="btn-primary" type="submit" value="add" />
+        </form>
+    </div>
+</div>
