@@ -1,4 +1,6 @@
-﻿using MVCFormsAuthentication.Models;
+﻿using MVCFormsAuthentication.Helpers;
+using MVCFormsAuthentication.Infrastructure.Providers;
+using MVCFormsAuthentication.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,9 +10,9 @@ using System.Web.Security;
 
 namespace MVCFormsAuthentication.Controllers
 {
+    [Authorize]
     public class AccountController : Controller
     {
-        // GET: Account
         [AllowAnonymous]
         public ActionResult Login()
         {
@@ -20,18 +22,19 @@ namespace MVCFormsAuthentication.Controllers
         [AllowAnonymous]
         public ActionResult Logout()
         {
-            FormsAuthentication.SignOut();
+            FormsAuthenticationHelper.Logout();
             return RedirectToAction("Login");
         }
 
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AllowAnonymous]
         public ActionResult Login(LoginViewModel model)
         {
-            if (model.UserName == "admin" && model.Password == "password")
+            var authprovider = new AuthenticationProvider();
+            if (authprovider.Login(model.UserName, model.Password))
             {
-                FormsAuthentication.SetAuthCookie(model.UserName, false);
                 return RedirectToAction("Index", "Home");
             }
             else

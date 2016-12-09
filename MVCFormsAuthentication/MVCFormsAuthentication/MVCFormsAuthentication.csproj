@@ -118,6 +118,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\BundleConfig.cs" />
+    <Compile Include="App_Start\FFGRolesConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\AccountController.cs" />
@@ -125,6 +126,12 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Infrastructure\Interfaces\IAuthenticationProvider.cs" />
+    <Compile Include="Infrastructure\Interfaces\IFFGPrincipal.cs" />
+    <Compile Include="Infrastructure\Models\FFGPrincipalSerializationModel.cs" />
+    <Compile Include="Infrastructure\Providers\AuthenticationProvider.cs" />
+    <Compile Include="Helpers\FormsAuthenticationHelper.cs" />
+    <Compile Include="Infrastructure\Models\FFGPrincipal.cs" />
     <Compile Include="Models\LoginViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

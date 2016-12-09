@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MVCFormsAuthentication.App_Start;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -6,13 +7,11 @@ using System.Web.Mvc;
 
 namespace MVCFormsAuthentication.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = FFGRolesConfig.AllowedRoles)]
     public class HomeController : Controller
     {
         public ActionResult Index()
         {
-            var test = User.Identity.IsAuthenticated;
-
             return View();
         }
 
