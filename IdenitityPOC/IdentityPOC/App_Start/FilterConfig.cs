@@ -5,9 +5,11 @@ namespace IdentityPOC
 {
     public class FilterConfig
     {
+        #region RegisterGlobalFilters
         public static void RegisterGlobalFilters(GlobalFilterCollection filters)
         {
             filters.Add(new HandleErrorAttribute());
-        }
+        } 
+        #endregion
     }
 }

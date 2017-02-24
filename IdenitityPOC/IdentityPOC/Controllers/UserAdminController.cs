@@ -6,6 +6,7 @@ using System.Web.Mvc;
 
 namespace IdentityPOC.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class UserAdminController : Controller
     {
         // GET: UserAdmin

@@ -13,18 +13,10 @@ namespace IdentityPOC.Controllers
     [Authorize]
     public class ManageController : Controller
     {
+        #region Properties
+
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
-
-        public ManageController()
-        {
-        }
-
-        public ManageController(ApplicationUserManager userManager, ApplicationSignInManager signInManager)
-        {
-            UserManager = userManager;
-            SignInManager = signInManager;
-        }
 
         public ApplicationSignInManager SignInManager
         {
@@ -32,9 +24,9 @@ namespace IdentityPOC.Controllers
             {
                 return _signInManager ?? HttpContext.GetOwinContext().Get<ApplicationSignInManager>();
             }
-            private set 
-            { 
-                _signInManager = value; 
+            private set
+            {
+                _signInManager = value;
             }
         }
 
@@ -48,8 +40,22 @@ namespace IdentityPOC.Controllers
             {
                 _userManager = value;
             }
+        } 
+        #endregion
+
+        #region Constructor
+        public ManageController()
+        {
         }
 
+        public ManageController(ApplicationUserManager userManager, ApplicationSignInManager signInManager)
+        {
+            UserManager = userManager;
+            SignInManager = signInManager;
+        }
+        #endregion
+
+        #region Index
         //
         // GET: /Manage/Index
         public async Task<ActionResult> Index(ManageMessageId? message)
@@ -74,6 +80,17 @@ namespace IdentityPOC.Controllers
             };
             return View(model);
         }
+        #endregion
+
+        #region RemoveLogin
+        //
+        // GET: /Account/RemoveLogin
+        public ActionResult RemoveLogin()
+        {
+            var linkedAccounts = UserManager.GetLogins(User.Identity.GetUserId());
+            ViewBag.ShowRemoveButton = HasPassword() || linkedAccounts.Count > 1;
+            return View(linkedAccounts);
+        }
 
         //
         // POST: /Manage/RemoveLogin
@@ -97,7 +114,8 @@ namespace IdentityPOC.Controllers
                 message = ManageMessageId.Error;
             }
             return RedirectToAction("ManageLogins", new { Message = message });
-        }
+        } 
+        #endregion
 
         //
         // GET: /Manage/AddPhoneNumber

@@ -14,6 +14,7 @@ using IdentityPOC.Models;
 
 namespace IdentityPOC
 {
+    #region EmailService
     public class EmailService : IIdentityMessageService
     {
         public Task SendAsync(IdentityMessage message)
@@ -22,7 +23,9 @@ namespace IdentityPOC
             return Task.FromResult(0);
         }
     }
+    #endregion
 
+    #region SmsService
     public class SmsService : IIdentityMessageService
     {
         public Task SendAsync(IdentityMessage message)
@@ -31,16 +34,21 @@ namespace IdentityPOC
             return Task.FromResult(0);
         }
     }
+    #endregion
 
+    #region ApplicationUserManager
     // Configure the application user manager used in this application. UserManager is defined in ASP.NET Identity and is used by the application.
     public class ApplicationUserManager : UserManager<ApplicationUser>
     {
+        #region Constructor
         public ApplicationUserManager(IUserStore<ApplicationUser> store)
-            : base(store)
+          : base(store)
         {
         }
+        #endregion
 
-        public static ApplicationUserManager Create(IdentityFactoryOptions<ApplicationUserManager> options, IOwinContext context) 
+        #region Create
+        public static ApplicationUserManager Create(IdentityFactoryOptions<ApplicationUserManager> options, IOwinContext context)
         {
             var manager = new ApplicationUserManager(new UserStore<ApplicationUser>(context.Get<ApplicationDbContext>()));
             // Configure validation logic for usernames
@@ -67,11 +75,11 @@ namespace IdentityPOC
 
             // Register two factor authentication providers. This application uses Phone and Emails as a step of receiving a code for verifying the user
             // You can write your own provider and plug it in here.
-            manager.RegisterTwoFactorProvider("Phone Code", new PhoneNumberTokenProvider<ApplicationUser>
+            manager.RegisterTwoFactorProvider("PhoneCode", new PhoneNumberTokenProvider<ApplicationUser>
             {
                 MessageFormat = "Your security code is {0}"
             });
-            manager.RegisterTwoFactorProvider("Email Code", new EmailTokenProvider<ApplicationUser>
+            manager.RegisterTwoFactorProvider("EmailCode", new EmailTokenProvider<ApplicationUser>
             {
                 Subject = "Security Code",
                 BodyFormat = "Your security code is {0}"
@@ -81,29 +89,105 @@ namespace IdentityPOC
             var dataProtectionProvider = options.DataProtectionProvider;
             if (dataProtectionProvider != null)
             {
-                manager.UserTokenProvider = 
+                manager.UserTokenProvider =
                     new DataProtectorTokenProvider<ApplicationUser>(dataProtectionProvider.Create("ASP.NET Identity"));
             }
             return manager;
-        }
+        } 
+        #endregion
     }
+    #endregion
 
+    #region ApplicationRoleManager
+    public class ApplicationRoleManager : RoleManager<ApplicationRole>
+    {
+        #region Constructor
+        public ApplicationRoleManager(IRoleStore<ApplicationRole, string> roleStore) : base(roleStore)
+        { }
+        #endregion
+
+        #region Create
+        public static ApplicationRoleManager Create(IdentityFactoryOptions<ApplicationRoleManager> options, IOwinContext context)
+        {
+            return new ApplicationRoleManager(new RoleStore<ApplicationRole>(context.Get<ApplicationDbContext>()));
+        } 
+        #endregion
+    }
+    #endregion
+
+    #region ApplicationSignInManager
     // Configure the application sign-in manager which is used in this application.
     public class ApplicationSignInManager : SignInManager<ApplicationUser, string>
     {
+        #region Constructor
         public ApplicationSignInManager(ApplicationUserManager userManager, IAuthenticationManager authenticationManager)
-            : base(userManager, authenticationManager)
+         : base(userManager, authenticationManager)
         {
         }
+        #endregion
 
+        #region CreateUserIdentityAsync
         public override Task<ClaimsIdentity> CreateUserIdentityAsync(ApplicationUser user)
         {
             return user.GenerateUserIdentityAsync((ApplicationUserManager)UserManager);
         }
+        #endregion
 
+        #region Create
         public static ApplicationSignInManager Create(IdentityFactoryOptions<ApplicationSignInManager> options, IOwinContext context)
         {
             return new ApplicationSignInManager(context.GetUserManager<ApplicationUserManager>(), context.Authentication);
-        }
+        } 
+        #endregion
     }
+    #endregion
+
+    #region ApplicationDbInitializer
+    public class ApplicationDbInitializer : CreateDatabaseIfNotExists<ApplicationDbContext>
+    {
+        #region Seed
+        protected override void Seed(ApplicationDbContext context)
+        {
+            InitializeIdentityForEF(context);
+            base.Seed(context);
+        }
+
+        #endregion
+
+        #region InitializeIdentityForEF
+        public static void InitializeIdentityForEF(ApplicationDbContext db)
+        {
+            var usermanager = HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>();
+            var rolemanager = HttpContext.Current.GetOwinContext().Get<ApplicationRoleManager>();
+            const string name = "maya.krunal@gmail.com";
+            const string password = "Admin@123456";
+            const string roleName = "Admin";
+
+            //Create Role Admin if it does not exist
+            var role = rolemanager.FindByName(roleName);
+            if (role == null)
+            {
+                role = new ApplicationRole(roleName);
+                var roleresult = rolemanager.Create(role);
+            }
+
+            //create user if not exists
+            var user = usermanager.FindByName(name);
+            if (user == null)
+            {
+                user = new ApplicationUser() { UserName = name, Email = name };
+                var result = usermanager.Create(user, password);
+                result = usermanager.SetLockoutEnabled(user.Id, false);
+            }
+
+            // Add user admin to Role Admin if not already added
+            var rolesForUser = usermanager.GetRoles(user.Id);
+            if (!rolesForUser.Contains(role.Name))
+            {
+                var result = usermanager.AddToRole(user.Id, role.Name);
+            }
+        } 
+        #endregion
+    } 
+    #endregion
 }

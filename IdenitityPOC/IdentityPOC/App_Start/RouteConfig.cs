@@ -7,8 +7,10 @@ using System.Web.Routing;
 
 namespace IdentityPOC
 {
+    #region RouteConfig
     public class RouteConfig
     {
+        #region RegisterRoutes
         public static void RegisterRoutes(RouteCollection routes)
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
@@ -18,6 +20,8 @@ namespace IdentityPOC
                 url: "{controller}/{action}/{id}",
                 defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }
             );
-        }
-    }
+        } 
+        #endregion
+    } 
+    #endregion
 }

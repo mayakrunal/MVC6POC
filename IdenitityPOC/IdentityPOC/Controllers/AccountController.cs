@@ -15,18 +15,9 @@ namespace IdentityPOC.Controllers
     [Authorize]
     public class AccountController : Controller
     {
+        #region Properties
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
-
-        public AccountController()
-        {
-        }
-
-        public AccountController(ApplicationUserManager userManager, ApplicationSignInManager signInManager)
-        {
-            UserManager = userManager;
-            SignInManager = signInManager;
-        }
 
         public ApplicationSignInManager SignInManager
         {
@@ -34,10 +25,7 @@ namespace IdentityPOC.Controllers
             {
                 return _signInManager ?? HttpContext.GetOwinContext().Get<ApplicationSignInManager>();
             }
-            private set
-            {
-                _signInManager = value;
-            }
+            private set { _signInManager = value; }
         }
 
         public ApplicationUserManager UserManager
@@ -46,12 +34,24 @@ namespace IdentityPOC.Controllers
             {
                 return _userManager ?? HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>();
             }
-            private set
-            {
-                _userManager = value;
-            }
+            private set { _userManager = value; }
+        }
+        #endregion
+
+        #region Constructor
+
+        public AccountController() { }
+
+        public AccountController(ApplicationUserManager userManager,
+                                 ApplicationSignInManager signInManager)
+        {
+            UserManager = userManager;
+            SignInManager = signInManager;
         }
 
+        #endregion
+
+        #region Login
         //
         // GET: /Account/Login
         [AllowAnonymous]
@@ -90,7 +90,9 @@ namespace IdentityPOC.Controllers
                     return View(model);
             }
         }
+        #endregion
 
+        #region VerifyCode
         //
         // GET: /Account/VerifyCode
         [AllowAnonymous]
@@ -101,7 +103,13 @@ namespace IdentityPOC.Controllers
             {
                 return View("Error");
             }
-            return View(new VerifyCodeViewModel { Provider = provider, ReturnUrl = returnUrl, RememberMe = rememberMe });
+            var user = await UserManager.FindByIdAsync(await SignInManager.GetVerifiedUserIdAsync());
+            if (user != null)
+            {
+                ViewBag.Status = "For DEMO purposes the current " + provider + " code is: " + await UserManager.GenerateTwoFactorTokenAsync(user.Id, provider);
+            }
+
+            return View(new VerifyCodeViewModel { Provider = provider, ReturnUrl = returnUrl });
         }
 
         //
@@ -120,7 +128,7 @@ namespace IdentityPOC.Controllers
             // If a user enters incorrect codes for a specified amount of time then the user account 
             // will be locked out for a specified amount of time. 
             // You can configure the account lockout settings in IdentityConfig
-            var result = await SignInManager.TwoFactorSignInAsync(model.Provider, model.Code, isPersistent: model.RememberMe, rememberBrowser: model.RememberBrowser);
+            var result = await SignInManager.TwoFactorSignInAsync(model.Provider, model.Code, isPersistent: false, rememberBrowser: model.RememberBrowser);
             switch (result)
             {
                 case SignInStatus.Success:
@@ -133,7 +141,9 @@ namespace IdentityPOC.Controllers
                     return View(model);
             }
         }
+        #endregion
 
+        #region Register
         //
         // GET: /Account/Register
         [AllowAnonymous]
@@ -154,7 +164,11 @@ namespace IdentityPOC.Controllers
                 var user = new ApplicationUser
                 {
                     UserName = model.UserName,
-                    Email = model.Email
+                    Email = model.Email,
+                    Address = model.Address,
+                    City = model.City,
+                    State = model.State,
+                    PostalCode = model.PostalCode
                 };
 
                 var result = await UserManager.CreateAsync(user, model.Password);
@@ -164,11 +178,11 @@ namespace IdentityPOC.Controllers
 
                     // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=320771
                     // Send an email with this link
-                    // string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
-                    // var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
-                    // await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>");
-
-                    return RedirectToAction("Index", "Home");
+                    string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
+                    var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
+                    await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>");
+                    ViewBag.Link = callbackUrl;
+                    return View("DisplayEmail");
                 }
                 AddErrors(result);
             }
@@ -176,7 +190,9 @@ namespace IdentityPOC.Controllers
             // If we got this far, something failed, redisplay form
             return View(model);
         }
+        #endregion
 
+        #region ConfirmEmail
         //
         // GET: /Account/ConfirmEmail
         [AllowAnonymous]
@@ -189,7 +205,9 @@ namespace IdentityPOC.Controllers
             var result = await UserManager.ConfirmEmailAsync(userId, code);
             return View(result.Succeeded ? "ConfirmEmail" : "Error");
         }
+        #endregion
 
+        #region ForgotPassword
         //
         // GET: /Account/ForgotPassword
         [AllowAnonymous]
@@ -216,24 +234,26 @@ namespace IdentityPOC.Controllers
 
                 // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=320771
                 // Send an email with this link
-                // string code = await UserManager.GeneratePasswordResetTokenAsync(user.Id);
-                // var callbackUrl = Url.Action("ResetPassword", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);		
-                // await UserManager.SendEmailAsync(user.Id, "Reset Password", "Please reset your password by clicking <a href=\"" + callbackUrl + "\">here</a>");
-                // return RedirectToAction("ForgotPasswordConfirmation", "Account");
+                string code = await UserManager.GeneratePasswordResetTokenAsync(user.Id);
+                var callbackUrl = Url.Action("ResetPassword", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
+                await UserManager.SendEmailAsync(user.Id, "Reset Password", "Please reset your password by clicking <a href=\"" + callbackUrl + "\">here</a>");
+                ViewBag.Link = callbackUrl;
+                return View("ForgotPasswordConfirmation");
             }
 
             // If we got this far, something failed, redisplay form
             return View(model);
         }
-
-        //
+        
         // GET: /Account/ForgotPasswordConfirmation
         [AllowAnonymous]
         public ActionResult ForgotPasswordConfirmation()
         {
             return View();
         }
+        #endregion
 
+        #region ResetPassword
         //
         // GET: /Account/ResetPassword
         [AllowAnonymous]
@@ -266,8 +286,8 @@ namespace IdentityPOC.Controllers
             }
             AddErrors(result);
             return View();
-        }
-
+        } 
+      
         //
         // GET: /Account/ResetPasswordConfirmation
         [AllowAnonymous]
@@ -276,6 +296,9 @@ namespace IdentityPOC.Controllers
             return View();
         }
 
+        #endregion
+
+        #region ExternalLogin
         //
         // POST: /Account/ExternalLogin
         [HttpPost]
@@ -286,7 +309,9 @@ namespace IdentityPOC.Controllers
             // Request a redirect to the external login provider
             return new ChallengeResult(provider, Url.Action("ExternalLoginCallback", "Account", new { ReturnUrl = returnUrl }));
         }
+        #endregion
 
+        #region SendCode
         //
         // GET: /Account/SendCode
         [AllowAnonymous]
@@ -299,7 +324,7 @@ namespace IdentityPOC.Controllers
             }
             var userFactors = await UserManager.GetValidTwoFactorProvidersAsync(userId);
             var factorOptions = userFactors.Select(purpose => new SelectListItem { Text = purpose, Value = purpose }).ToList();
-            return View(new SendCodeViewModel { Providers = factorOptions, ReturnUrl = returnUrl, RememberMe = rememberMe });
+            return View(new SendCodeViewModel { Providers = factorOptions, ReturnUrl = returnUrl });
         }
 
         //
@@ -319,9 +344,12 @@ namespace IdentityPOC.Controllers
             {
                 return View("Error");
             }
-            return RedirectToAction("VerifyCode", new { Provider = model.SelectedProvider, ReturnUrl = model.ReturnUrl, RememberMe = model.RememberMe });
+            return RedirectToAction("VerifyCode", new { Provider = model.SelectedProvider, ReturnUrl = model.ReturnUrl });
         }
 
+        #endregion
+
+        #region ExternalLoginCallback
         //
         // GET: /Account/ExternalLoginCallback
         [AllowAnonymous]
@@ -351,7 +379,9 @@ namespace IdentityPOC.Controllers
                     return View("ExternalLoginConfirmation", new ExternalLoginConfirmationViewModel { Email = loginInfo.Email });
             }
         }
+        #endregion
 
+        #region ExternalLoginConfirmation
         //
         // POST: /Account/ExternalLoginConfirmation
         [HttpPost]
@@ -389,17 +419,21 @@ namespace IdentityPOC.Controllers
             ViewBag.ReturnUrl = returnUrl;
             return View(model);
         }
+        #endregion
 
+        #region LogOff
         //
         // POST: /Account/LogOff
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult LogOff()
         {
-            AuthenticationManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
+            AuthenticationManager.SignOut();
             return RedirectToAction("Index", "Home");
         }
+        #endregion
 
+        #region ExternalLoginFailure
         //
         // GET: /Account/ExternalLoginFailure
         [AllowAnonymous]
@@ -407,6 +441,9 @@ namespace IdentityPOC.Controllers
         {
             return View();
         }
+        #endregion
+
+        #region Dispose
 
         protected override void Dispose(bool disposing)
         {
@@ -426,7 +463,8 @@ namespace IdentityPOC.Controllers
             }
 
             base.Dispose(disposing);
-        }
+        } 
+        #endregion
 
         #region Helpers
         // Used for XSRF protection when adding external logins

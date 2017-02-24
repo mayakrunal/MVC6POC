@@ -20,7 +20,7 @@ namespace IdentityPOC.Models
         public string SelectedProvider { get; set; }
         public ICollection<System.Web.Mvc.SelectListItem> Providers { get; set; }
         public string ReturnUrl { get; set; }
-        public bool RememberMe { get; set; }
+        //public bool RememberMe { get; set; }
     }
 
     public class VerifyCodeViewModel
@@ -36,7 +36,7 @@ namespace IdentityPOC.Models
         [Display(Name = "Remember this browser?")]
         public bool RememberBrowser { get; set; }
 
-        public bool RememberMe { get; set; }
+        //public bool RememberMe { get; set; }
     }
 
     public class ForgotViewModel
@@ -64,7 +64,7 @@ namespace IdentityPOC.Models
     public class RegisterViewModel
     {
         [Required]
-        [Display(Name ="UserName")]
+        [Display(Name = "UserName")]
         public string UserName { get; set; }
 
         [Required]
@@ -82,6 +82,14 @@ namespace IdentityPOC.Models
         [Display(Name = "Confirm password")]
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; }
+
+        // Add New address properties
+        public string Address { get; set; }
+        public string City { get; set; }
+        public string State { get; set; }
+
+        [Display(Name = "Postal Code")]
+        public string PostalCode { get; set; }
     }
 
     public class ResetPasswordViewModel
