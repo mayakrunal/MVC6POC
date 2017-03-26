@@ -1,4 +1,17 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿// ***********************************************************************
+// Assembly         : SportsStore
+// Author           : Krunal
+// Created          : 03-26-2017
+//
+// Last Modified By : Krunal
+// Last Modified On : 03-26-2017
+// ***********************************************************************
+// <copyright file="SeedData.cs" company="">
+//     Copyright (c) . All rights reserved.
+// </copyright>
+// <summary></summary>
+// ***********************************************************************
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -7,8 +20,15 @@ using System.Threading.Tasks;
 
 namespace SportsStore.Models
 {
+    /// <summary>
+    /// Class SeedData.
+    /// </summary>
     public class SeedData
     {
+        /// <summary>
+        /// Ensures the populated.
+        /// </summary>
+        /// <param name="app">The application.</param>
         public static void EnsurePopulated(IApplicationBuilder app)
         {
             ApplicationDbContext context = app.ApplicationServices
