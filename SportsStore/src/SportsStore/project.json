@@ -29,7 +29,10 @@
       "version": "1.0.0-preview2-final",
       "type": "build"
     },
-    "Microsoft.Extensions.Configuration.Json": "1.1.0"
+    "Microsoft.Extensions.Configuration.Json": "1.1.0",
+    "Microsoft.AspNetCore.Session": "1.1.1",
+    "Microsoft.Extensions.Caching.Memory": "1.1.1",
+    "Microsoft.AspNetCore.Http.Extensions": "1.1.1"
   },
   "frameworks": {
     "netcoreapp1.0": {

@@ -1,8 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SportsStore.Models
 {
@@ -24,5 +20,11 @@ namespace SportsStore.Models
         /// </summary>
         /// <value>The products.</value>
         public DbSet<Product> Products { get; set; }
+
+        /// <summary>
+        /// Gets or sets the orders.
+        /// </summary>
+        /// <value>The orders.</value>
+        public DbSet<Order> Orders { get; set; }
     }
 }

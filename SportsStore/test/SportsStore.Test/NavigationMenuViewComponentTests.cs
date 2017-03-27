@@ -3,11 +3,9 @@ using Microsoft.AspNetCore.Mvc.ViewComponents;
 using Microsoft.AspNetCore.Routing;
 using Moq;
 using SportsStore.Models;
-using SportsStore.Views.Components;
-using System;
+using SportsStore.Components;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace SportsStore.Test

@@ -1,11 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SportsStore.Models;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
-namespace SportsStore.Views.Components
+namespace SportsStore.Components
 {
     public class NavigationMenuViewComponent : ViewComponent
     {
