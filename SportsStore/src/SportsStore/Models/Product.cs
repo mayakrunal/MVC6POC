@@ -12,6 +12,8 @@
 // <summary></summary>
 // ***********************************************************************
 
+using System.ComponentModel.DataAnnotations;
+
 namespace SportsStore.Models
 {
     /// <summary>
@@ -24,25 +26,36 @@ namespace SportsStore.Models
         /// </summary>
         /// <value>The product identifier.</value>
         public int ProductID { get; set; }
+
         /// <summary>
         /// Gets or sets the name.
         /// </summary>
-        /// <value>The name.</value>
+        /// <value>
+        /// The name.
+        /// </value>
+        [Required(ErrorMessage = "Please enter a product name")]
         public string Name { get; set; }
+
         /// <summary>
         /// Gets or sets the description.
         /// </summary>
         /// <value>The description.</value>
+        [Required(ErrorMessage = "Please enter a description")]
         public string Description { get; set; }
+
         /// <summary>
         /// Gets or sets the price.
         /// </summary>
         /// <value>The price.</value>
+        [Required]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Please enter a positive price")]
         public decimal Price { get; set; }
+
         /// <summary>
         /// Gets or sets the category.
         /// </summary>
         /// <value>The category.</value>
+        [Required(ErrorMessage = "Please specify a category")]
         public string Category { get; set; }
     }
 }

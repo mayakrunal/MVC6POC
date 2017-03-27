@@ -11,6 +11,7 @@
 // </copyright>
 // <summary></summary>
 // ***********************************************************************
+using System;
 using System.Collections.Generic;
 
 namespace SportsStore.Models
@@ -19,7 +20,7 @@ namespace SportsStore.Models
     /// Class FakeProductRepository.
     /// </summary>
     /// <seealso cref="SportsStore.Models.IProductRepository" />
-    public class FakeProductRepository : IProductRepository
+    public class FakeProductRepository /*: IProductRepository*/
     {
         /// <summary>
         /// Gets the products.
