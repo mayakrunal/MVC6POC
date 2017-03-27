@@ -42,6 +42,7 @@ namespace SportsStore
             Configuration = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
                 .AddJsonFile("appsettings.json")
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", true)
                 .Build();
         }
 
@@ -93,11 +94,19 @@ namespace SportsStore
                 app.UseDeveloperExceptionPage();
                 app.UseStatusCodePages();
             }
+            else
+            {
+                app.UseExceptionHandler("/Error");
+            }
             app.UseStaticFiles();
             app.UseSession();
             app.UseIdentity();
             app.UseMvc(routes =>
             {
+                routes.MapRoute(name: "Error", 
+                                template: "Error",
+                                defaults: new { controller = "Error", action = "Error" });
+
                 routes.MapRoute(
                     name: null,
                     template: "{category}/Page{page:int}",
