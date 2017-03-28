@@ -1,0 +1,9 @@
+{
+    "name": "PartyInvites",
+    "private": true,
+    "dependencies": {
+        "bootstrap": "latest",
+        "jquery-validation": "latest",
+        "jquery-validation-unobtrusive": "latest"
+    }
+}
